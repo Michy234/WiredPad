@@ -11,6 +11,7 @@ int main(int argc, char **argv) {
     app.setApplicationVersion("0.1.0");
     app.setDesktopFileName("io.github.Michy234.WiredPad");
     app.setWindowIcon(QIcon(":/assets/icon.svg"));
+    app.setQuitOnLastWindowClosed(false);
     QLockFile lock(QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation) +
                    "/wiredpad-app.lock");
     if (!lock.tryLock()) {

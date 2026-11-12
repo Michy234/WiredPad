@@ -19,9 +19,9 @@ cd WiredPad/packaging/arch
 makepkg -si
 ```
 
-Install a compatible **EVDI kernel module and libevdi**, along with headers for
-your running kernel. This driver is required to create the extra display.
-WiredPad does not download kernel code or upgrade your kernel automatically.
+WiredPad builds its user-space `libevdi` library automatically. You only need
+the EVDI kernel module. Run `./scripts/setup-evdi.sh` to configure or build
+the driver for your running kernel.
 
 Then:
 
@@ -42,7 +42,7 @@ available in [Releases](https://github.com/Michy234/WiredPad/releases).
 - A virtual EVDI display at the resolution reported by the tablet.
 - JPEG video encoding with FFmpeg, and absolute pointer input through uinput.
 - Video updates, taps and window dragging tested on **Plasma Wayland**.
-- A native Qt app, desktop launcher and optional command-line host/user service.
+- Native Qt app with system tray minimization, desktop launcher and host daemon.
 
 Hardware testing currently covers an iPad mini with iOS 9.3.6 and Wired XDisplay
 1.2.3. Other iOS versions and X11 need more testing. Android is not supported.

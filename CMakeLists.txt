@@ -1,11 +1,31 @@
 cmake_minimum_required(VERSION 3.20)
-project(WiredPad VERSION 0.1.0 LANGUAGES CXX)
+project(WiredPad VERSION 0.1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(GNUInstallDirs)
 include(CTest)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(HOST REQUIRED IMPORTED_TARGET libusbmuxd-2.0 libimobiledevice-1.0 libavcodec libavutil libswscale)
+pkg_check_modules(LIBDRM libdrm)
+
+if(LIBDRM_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third_party/libevdi/evdi_lib.c")
+    add_library(evdi SHARED
+        third_party/libevdi/evdi_lib.c
+        third_party/libevdi/evdi_procfs.c
+    )
+    set_target_properties(evdi PROPERTIES
+        OUTPUT_NAME evdi
+        SOVERSION 1
+        VERSION 1.15.1
+    )
+    target_include_directories(evdi PUBLIC
+        third_party/libevdi
+        ${LIBDRM_INCLUDE_DIRS}
+    )
+    target_compile_definitions(evdi PRIVATE _FILE_OFFSET_BITS=64)
+    install(TARGETS evdi LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+endif()
+
 add_library(platform src/platform.cpp)
 target_include_directories(platform PUBLIC src)
 add_library(protocol src/protocol.cpp)
@@ -37,6 +57,7 @@ if(BUILD_TESTING)
 endif()
 install(TARGETS wiredpad-host RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(PROGRAMS scripts/map-input-plasma.sh DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME wiredpad-map-input)
+install(PROGRAMS scripts/setup-evdi.sh DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME wiredpad-setup-evdi)
 install(FILES packaging/io.github.Michy234.WiredPad.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
 install(FILES assets/icon.svg DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps RENAME io.github.Michy234.WiredPad.svg)
 install(FILES packaging/io.github.Michy234.WiredPad.metainfo.xml DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo)

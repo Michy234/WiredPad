@@ -1,13 +1,16 @@
 #pragma once
+#include <QAction>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QLabel>
+#include <QMenu>
 #include <QPlainTextEdit>
 #include <QProcess>
 #include <QPushButton>
 #include <QSet>
 #include <QSettings>
 #include <QSpinBox>
+#include <QSystemTrayIcon>
 #include <QTimer>
 #include <QWidget>
 
@@ -17,13 +20,18 @@ class Window : public QWidget {
     QLabel *status_, *detail_, *mapping_;
     QPushButton *start_, *load_;
     QSpinBox *fps_;
-    QCheckBox *input_;
+    QCheckBox *input_, *minimizeToTray_;
     QComboBox *output_;
     QPlainTextEdit *logs_;
     QTimer refresh_;
+    QSystemTrayIcon *trayIcon_ = nullptr;
+    QMenu *trayMenu_ = nullptr;
+    QAction *trayShowAction_ = nullptr;
+    QAction *trayStartStopAction_ = nullptr;
+    QAction *trayQuitAction_ = nullptr;
     QString pending_, desiredOutput_, hostPath_;
     QSet<QString> mapped_;
-    bool closing_ = false, stopping_ = false;
+    bool closing_ = false, stopping_ = false, forceQuit_ = false;
     void start();
     void stop();
     void refresh();
@@ -32,6 +40,7 @@ class Window : public QWidget {
     void setStatus(const QString &title, const QString &detail);
     void appendLog(const QString &line);
     void loadDriver();
+    void setupTray();
     QStringList cards() const;
     QString virtualOutput() const;
     void updateScreens();

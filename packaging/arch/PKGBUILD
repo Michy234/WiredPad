@@ -6,9 +6,9 @@ pkgdesc='Use your tablet as an extra display on Linux over USB'
 arch=('x86_64' 'aarch64')
 url='https://github.com/Michy234/WiredPad'
 license=('GPL-3.0-or-later')
-depends=('ffmpeg' 'libusbmuxd' 'libimobiledevice' 'libplist' 'qt6-base' 'qt6-svg' 'usbmuxd')
+depends=('ffmpeg' 'libdrm' 'libusbmuxd' 'libimobiledevice' 'libplist' 'qt6-base' 'qt6-svg' 'usbmuxd')
 makedepends=('cmake' 'pkgconf')
-optdepends=('evdi-dkms: virtual display kernel driver (also install libevdi)'
+optdepends=('evdi-dkms: virtual display kernel driver'
             'polkit: load the display driver from the app'
             'kscreen: Plasma display settings'
             'xorg-xinput: input mapping in X11')

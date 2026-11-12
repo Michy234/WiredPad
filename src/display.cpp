@@ -15,6 +15,9 @@ Display::Display(int card, int w, int h, int fps) : width_(w), height_(h) {
             candidates.push_back(std::string(home) + "/.local/lib/libevdi.so.1");
             candidates.push_back(std::string(home) + "/.local/lib/libevdi.so");
         }
+        candidates.push_back("./build/libevdi.so.1");
+        candidates.push_back("./libevdi.so.1");
+        candidates.push_back("../build/libevdi.so.1");
         candidates.push_back(".research/evdi/library/libevdi.so.1");
         candidates.push_back("../.research/evdi/library/libevdi.so.1");
 

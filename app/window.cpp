@@ -60,6 +60,12 @@ Window::Window() {
     input_ = new QCheckBox("Enable tablet input");
     input_->setChecked(settings_.value("input", true).toBool());
     form->addRow("", input_);
+    minimizeToTray_ = new QCheckBox("Minimize to system tray when closed");
+    minimizeToTray_->setChecked(settings_.value("minimize_to_tray", true).toBool());
+    connect(minimizeToTray_, &QCheckBox::toggled, this, [this](bool checked) {
+        settings_.setValue("minimize_to_tray", checked);
+    });
+    form->addRow("", minimizeToTray_);
     output_ = new QComboBox;
     output_->setAccessibleName("Input display");
     form->addRow("&Input display", output_);
@@ -140,6 +146,10 @@ Window::Window() {
                       QString("The host exited (%1). Open Diagnostics for details.").arg(code));
         stopping_ = false;
         mapped_.clear();
+        if (trayStartStopAction_)
+            trayStartStopAction_->setText("&Start display");
+        if (trayIcon_)
+            trayIcon_->setToolTip("WiredPad - Ready");
         if (closing_)
             close();
     });
@@ -168,6 +178,7 @@ Window::Window() {
     refresh_.start(2000);
     updateScreens();
     refresh();
+    setupTray();
 }
 QStringList Window::cards() const {
     QStringList result;
@@ -264,6 +275,10 @@ void Window::start() {
     fps_->setEnabled(false);
     input_->setEnabled(false);
     start_->setText("&Stop display");
+    if (trayStartStopAction_)
+        trayStartStopAction_->setText("&Stop display");
+    if (trayIcon_)
+        trayIcon_->setToolTip("WiredPad - Sharing display");
     setStatus("Waiting for your iPad",
               "Connect the USB cable, unlock your iPad, and open Wired XDisplay.");
     auto env = QProcessEnvironment::systemEnvironment();
@@ -380,7 +395,72 @@ void Window::loadDriver() {
     setStatus("Loading display driver", "Your desktop may ask for administrator authentication.");
     driver_.start(pkexec, {modprobe, "evdi", "initial_device_count=1"});
 }
+void Window::setupTray() {
+    if (!QSystemTrayIcon::isSystemTrayAvailable())
+        return;
+
+    trayIcon_ = new QSystemTrayIcon(this);
+    trayIcon_->setIcon(QIcon(":/assets/icon.svg"));
+    trayIcon_->setToolTip("WiredPad");
+
+    trayMenu_ = new QMenu(this);
+    trayShowAction_ = trayMenu_->addAction("&Show WiredPad", this, [this] {
+        showNormal();
+        activateWindow();
+        raise();
+    });
+    trayStartStopAction_ = trayMenu_->addAction("&Start display", this, [this] {
+        if (host_.state() == QProcess::NotRunning)
+            start();
+        else
+            stop();
+    });
+    trayMenu_->addSeparator();
+    trayQuitAction_ = trayMenu_->addAction("&Quit WiredPad", this, [this] {
+        forceQuit_ = true;
+        if (host_.state() != QProcess::NotRunning) {
+            host_.terminate();
+            host_.waitForFinished(2000);
+            if (host_.state() != QProcess::NotRunning)
+                host_.kill();
+        }
+        if (driver_.state() != QProcess::NotRunning)
+            driver_.terminate();
+        qApp->quit();
+    });
+
+    trayIcon_->setContextMenu(trayMenu_);
+
+    connect(trayIcon_, &QSystemTrayIcon::activated, this,
+            [this](QSystemTrayIcon::ActivationReason reason) {
+                if (reason == QSystemTrayIcon::Trigger || reason == QSystemTrayIcon::DoubleClick) {
+                    if (isVisible() && !isMinimized()) {
+                        hide();
+                    } else {
+                        showNormal();
+                        activateWindow();
+                        raise();
+                    }
+                }
+            });
+
+    trayIcon_->show();
+}
+
 void Window::closeEvent(QCloseEvent *event) {
+    if (forceQuit_) {
+        if (host_.state() != QProcess::NotRunning)
+            host_.kill();
+        if (driver_.state() != QProcess::NotRunning)
+            driver_.terminate();
+        event->accept();
+        return;
+    }
+    if (trayIcon_ && trayIcon_->isVisible() && minimizeToTray_ && minimizeToTray_->isChecked()) {
+        event->ignore();
+        hide();
+        return;
+    }
     if (host_.state() != QProcess::NotRunning) {
         closing_ = true;
         event->ignore();

@@ -4,10 +4,19 @@ WiredPad is a desktop-session app. Run it as your normal user, not as root.
 
 ## Arch Linux
 
-Install the EVDI kernel module and library, plus the headers matching your running
-kernel (`uname -r`). The community EVDI package must support that kernel. WiredPad
-does not install third-party kernel code or upgrade your kernel automatically.
-An existing DisplayLink installation must not own the EVDI card used by WiredPad.
+WiredPad includes and builds the user-space `libevdi` library automatically, so
+a separate library package is not required. You only need the EVDI kernel module.
+
+If you are running a recent kernel (such as Linux 6.12+ or 7.x / linux-zen),
+use the automated setup script to build and configure the matching driver:
+
+```sh
+./scripts/setup-evdi.sh
+# or after package installation:
+wiredpad-setup-evdi
+```
+
+Alternatively, install `evdi-dkms` and headers for your running kernel (`uname -r`).
 
 Start the USB service, connect and unlock the iPad, and accept the trust prompt:
 
