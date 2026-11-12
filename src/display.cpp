@@ -1,12 +1,28 @@
 #include "display.hpp"
 #include <dlfcn.h>
 #include <iostream>
+#include <cstdlib>
+#include <string>
+#include <vector>
 namespace xd {
 Display::Display(int card, int w, int h, int fps) : width_(w), height_(h) {
     try {
-        lib_ = dlopen("libevdi.so.1", RTLD_NOW | RTLD_LOCAL);
-        if (!lib_)
-            lib_ = dlopen("libevdi.so", RTLD_NOW | RTLD_LOCAL);
+        std::vector<std::string> candidates = {"libevdi.so.1", "libevdi.so"};
+        if (const char *custom = std::getenv("LIBEVDI_PATH"); custom && *custom) {
+            candidates.insert(candidates.begin(), custom);
+        }
+        if (const char *home = std::getenv("HOME"); home && *home) {
+            candidates.push_back(std::string(home) + "/.local/lib/libevdi.so.1");
+            candidates.push_back(std::string(home) + "/.local/lib/libevdi.so");
+        }
+        candidates.push_back(".research/evdi/library/libevdi.so.1");
+        candidates.push_back("../.research/evdi/library/libevdi.so.1");
+
+        for (const auto &candidate : candidates) {
+            lib_ = dlopen(candidate.c_str(), RTLD_NOW | RTLD_LOCAL);
+            if (lib_)
+                break;
+        }
         if (!lib_)
             throw std::runtime_error("install EVDI library and matching evdi kernel module");
 #define LOAD(var, name)                                                                            \

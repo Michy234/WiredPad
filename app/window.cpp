@@ -266,6 +266,13 @@ void Window::start() {
     start_->setText("&Stop display");
     setStatus("Waiting for your iPad",
               "Connect the USB cable, unlock your iPad, and open Wired XDisplay.");
+    auto env = QProcessEnvironment::systemEnvironment();
+    QString localLib = QDir::homePath() + "/.local/lib";
+    QString currentLd = env.value("LD_LIBRARY_PATH");
+    if (!currentLd.contains(localLib)) {
+        env.insert("LD_LIBRARY_PATH", localLib + (currentLd.isEmpty() ? "" : ":" + currentLd));
+    }
+    host_.setProcessEnvironment(env);
     host_.start(hostPath_, args);
 }
 void Window::stop() {
