@@ -1,0 +1,45 @@
+{
+  "capture_sha256": "2e57c0a9e99095aa77d2b089e131c21356653644137617d402b5882765957e52",
+  "packet_count": 4145,
+  "tcp_client_port": 50635,
+  "usbmuxd_port": 27015,
+  "ipad_port": 6789,
+  "tcp_reassembly": {
+    "gaps": 0,
+    "conflicting_overlaps": 0
+  },
+  "host_application_bytes": 84075974,
+  "video_tag": 6,
+  "video_frames": 797,
+  "frame_size_min": 104385,
+  "frame_size_max": 105607,
+  "codec": "JPEG baseline, independent complete images",
+  "frame_properties": [
+    {
+      "sof_marker": "0xc0",
+      "precision": 8,
+      "width": 1024,
+      "height": 768,
+      "sampling": [
+        34,
+        17,
+        17
+      ],
+      "count": 797
+    }
+  ],
+  "first_frame_prefix_hex": "ff d8 ff e0 00 10 4a 46 49 46 00 01 01 01 00 60 00 60 00 00 ff db 00 43",
+  "frame_start_hex": "ff d8",
+  "frame_end_hex": "ff d9",
+  "input_packets": 20,
+  "input_commands": {
+    "5": 10,
+    "6": 10
+  },
+  "input_example": {
+    "down_hex": "07 00 00 0c 00 00 00 05 00 00 01 b1 00 00 01 4e",
+    "up_hex": "07 00 00 0c 00 00 00 06 00 00 01 b1 00 00 01 4e",
+    "x": 433,
+    "y": 334
+  }
+}

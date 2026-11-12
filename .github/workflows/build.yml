@@ -1,0 +1,23 @@
+name: Build
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  arch:
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    steps:
+      - name: Install build dependencies
+        run: pacman -Syu --noconfirm cmake pkgconf git ffmpeg libusbmuxd libimobiledevice libplist qt6-base qt6-svg
+      - uses: actions/checkout@v4
+      - name: Build and test
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+          cmake --build build --parallel 2
+          ctest --test-dir build --output-on-failure
+          DESTDIR="$PWD/stage" cmake --install build
+      - name: Upload staged installation
+        uses: actions/upload-artifact@v4
+        with:
+          name: wiredpad-linux-x86_64
+          path: stage/

@@ -1,0 +1,2 @@
+# Allow the active local desktop session to create WiredPad input devices.
+SUBSYSTEM=="misc", KERNEL=="uinput", TAG+="uaccess", OPTIONS+="static_node=uinput"

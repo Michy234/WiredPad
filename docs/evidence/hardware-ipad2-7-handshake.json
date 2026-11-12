@@ -1,0 +1,16 @@
+{
+  "date":"2026-11-12",
+  "device":"iPad2,7",
+  "ios":"9.3.6",
+  "app":"com.splashtop.wiredxdisplayipad 1.2.3 (84686)",
+  "messages":[
+    {"direction":"host_to_ipad","hex":"04 00 00 00"},
+    {"direction":"ipad_to_host","hex":"04 00 00 00"},
+    {"direction":"host_to_ipad","hex":"05 00 00 0c 00 00 00 01 00 00 00 00 00 00 00 00"},
+    {"direction":"ipad_to_host","hex":"05 00 00 0c 00 00 00 02 00 00 04 00 00 00 03 00"},
+    {"direction":"host_to_ipad","hex":"05 00 00 0c 00 00 00 fe 00 00 00 00 00 00 00 00"},
+    {"direction":"ipad_to_host","hex":"05 00 00 0c 00 00 00 ff 00 00 00 00 00 00 00 00"},
+    {"direction":"host_to_ipad","hex":"05 00 00 0c 00 00 00 fc 05 00 00 00 00 00 00 00"},
+    {"direction":"ipad_to_host","hex":"05 00 00 0c 00 00 00 fd 00 00 00 00 00 00 00 00"}
+  ]
+}

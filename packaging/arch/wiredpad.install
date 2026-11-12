@@ -1,0 +1,7 @@
+post_install() {
+    udevadm control --reload-rules
+    udevadm trigger --action=change --subsystem-match=misc --sysname-match=uinput
+    printf '%s\n' 'WiredPad: install EVDI and the headers for your running kernel.' 'Open WiredPad from your application menu to connect your tablet.'
+}
+post_upgrade() { post_install; }
+post_remove() { udevadm control --reload-rules; }

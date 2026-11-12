@@ -1,0 +1,32 @@
+# Build from a WiredPad checkout: makepkg -si
+pkgname=wiredpad
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='Use your tablet as an extra display on Linux over USB'
+arch=('x86_64' 'aarch64')
+url='https://github.com/Michy234/WiredPad'
+license=('GPL-3.0-or-later')
+depends=('ffmpeg' 'libusbmuxd' 'libimobiledevice' 'libplist' 'qt6-base' 'qt6-svg' 'usbmuxd')
+makedepends=('cmake' 'pkgconf')
+optdepends=('evdi-dkms: virtual display kernel driver (also install libevdi)'
+            'polkit: load the display driver from the app'
+            'kscreen: Plasma display settings'
+            'xorg-xinput: input mapping in X11')
+install=wiredpad.install
+source=()
+sha256sums=()
+
+build() {
+    cmake -S "$startdir/../.." -B "$srcdir/build" \
+        -DCMAKE_BUILD_TYPE=None \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_INSTALL_LIBDIR=lib \
+        -DCMAKE_INSTALL_DOCDIR=share/doc/wiredpad
+    cmake --build "$srcdir/build" --parallel 2
+}
+check() {
+    ctest --test-dir "$srcdir/build" --output-on-failure
+}
+package() {
+    DESTDIR="$pkgdir" cmake --install "$srcdir/build"
+}

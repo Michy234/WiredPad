@@ -1,0 +1,16 @@
+/build/
+/.research/
+/research/
+/dist/
+/src/build/
+/pkg/
+/src/wiredpad/
+*.pkg.tar.*
+*.exe
+*.pcap*
+__pycache__/
+/HARDWARE_TESTS.md
+/WINDOWS_CAPTURE.md
+
+/packaging/arch/src/
+/packaging/arch/pkg/

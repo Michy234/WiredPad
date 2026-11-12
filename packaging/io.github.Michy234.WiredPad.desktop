@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Name=WiredPad
+GenericName=Tablet Display
+Comment=Use your tablet as an extra display over USB
+Exec=wiredpad
+Icon=io.github.Michy234.WiredPad
+Terminal=false
+Categories=Utility;
+Keywords=tablet;display;monitor;USB;iPad;
+StartupNotify=true
+Actions=StartDisplay;
+
+[Desktop Action StartDisplay]
+Name=Start display
+Exec=wiredpad --start
