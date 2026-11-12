@@ -22,8 +22,9 @@
 Window::Window() {
     setWindowTitle("WiredPad");
     resize(560, 480);
-    setMinimumWidth(420);
     hostPath_ = QCoreApplication::applicationDirPath() + "/wiredpad-host";
+    if (!QFileInfo::exists(hostPath_))
+        hostPath_ = QStandardPaths::findExecutable("wiredpad-host");
     auto root = new QVBoxLayout(this);
     root->setContentsMargins(24, 24, 24, 24);
     root->setSpacing(16);
