@@ -1,0 +1,138 @@
+{
+    "app-id": "io.github.Michy234.WiredPad",
+    "runtime": "org.kde.Platform",
+    "runtime-version": "6.11",
+    "sdk": "org.kde.Sdk",
+    "command": "wiredpad",
+    "finish-args": [
+        "--socket=wayland",
+        "--socket=fallback-x11",
+        "--share=ipc",
+        "--device=all",
+        "--filesystem=/run/usbmuxd",
+        "--env=USBMUXD_SOCKET_ADDRESS=UNIX:/run/usbmuxd",
+        "--talk-name=org.kde.KWin",
+        "--talk-name=org.kde.StatusNotifierWatcher"
+    ],
+    "cleanup": [
+        "/include",
+        "/lib/pkgconfig",
+        "/lib/*.la",
+        "/lib/udev",
+        "/lib/modules-load.d",
+        "/lib/systemd",
+        "/bin/wiredpad-setup-evdi"
+    ],
+    "modules": [
+        {
+            "name": "libplist",
+            "config-opts": [
+                "--disable-static",
+                "--without-cython"
+            ],
+            "sources": [
+                {
+                    "type": "archive",
+                    "url": "https://github.com/libimobiledevice/libplist/releases/download/2.8.1/libplist-2.8.1.tar.bz2",
+                    "sha256": "2a1792e5820e1657c173735fde75baeebd6dd967d2ac47be1e3891ddc64ebefa"
+                }
+            ]
+        },
+        {
+            "name": "libimobiledevice-glue",
+            "config-opts": [
+                "--disable-static"
+            ],
+            "sources": [
+                {
+                    "type": "archive",
+                    "url": "https://github.com/libimobiledevice/libimobiledevice-glue/releases/download/1.3.3/libimobiledevice-glue-1.3.3.tar.bz2",
+                    "sha256": "920ce01382a32695f49b23292b4979a03f0afd16c58e8755d8b7f41804acc1a9"
+                }
+            ]
+        },
+        {
+            "name": "libusbmuxd",
+            "config-opts": [
+                "--disable-static"
+            ],
+            "sources": [
+                {
+                    "type": "archive",
+                    "url": "https://github.com/libimobiledevice/libusbmuxd/releases/download/2.1.1/libusbmuxd-2.1.1.tar.bz2",
+                    "sha256": "5546f1aba1c3d1812c2b47d976312d00547d1044b84b6a461323c621f396efce"
+                }
+            ]
+        },
+        {
+            "name": "libtatsu",
+            "config-opts": [
+                "--disable-static"
+            ],
+            "sources": [
+                {
+                    "type": "archive",
+                    "url": "https://github.com/libimobiledevice/libtatsu/releases/download/1.1.1/libtatsu-1.1.1.tar.bz2",
+                    "sha256": "18f471f131c1d55ccc02fa09565d870030c6ce92f737b89fe1b3849941ebb303"
+                }
+            ]
+        },
+        {
+            "name": "libimobiledevice",
+            "config-opts": [
+                "--disable-static",
+                "--without-cython"
+            ],
+            "sources": [
+                {
+                    "type": "archive",
+                    "url": "https://github.com/libimobiledevice/libimobiledevice/releases/download/1.4.0/libimobiledevice-1.4.0.tar.bz2",
+                    "sha256": "23cc0077e221c7d991bd0eb02150a0d49199bcca1ddf059edccee9ffd914939d"
+                }
+            ]
+        },
+        {
+            "name": "ffmpeg",
+            "buildsystem": "simple",
+            "build-commands": [
+                "./configure --prefix=/app --enable-shared --disable-static --disable-programs --disable-doc --disable-autodetect --disable-everything --disable-network --disable-x86asm --disable-avdevice --disable-avfilter --disable-avformat --disable-swresample --enable-encoder=mjpeg --enable-decoder=mjpeg",
+                "make -j \"$FLATPAK_BUILDER_N_JOBS\"",
+                "make install"
+            ],
+            "sources": [
+                {
+                    "type": "archive",
+                    "url": "https://ffmpeg.org/releases/ffmpeg-8.0.1.tar.xz",
+                    "sha256": "05ee0b03119b45c0bdb4df654b96802e909e0a752f72e4fe3794f487229e5a41"
+                }
+            ]
+        },
+        {
+            "name": "wiredpad",
+            "buildsystem": "cmake-ninja",
+            "config-opts": [
+                "-DCMAKE_BUILD_TYPE=Release",
+                "-DCMAKE_INSTALL_LIBDIR=lib"
+            ],
+            "test-commands": [
+                "ctest --output-on-failure"
+            ],
+            "sources": [
+                {
+                    "type": "dir",
+                    "path": "../..",
+                    "skip": [
+                        ".git",
+                        ".research",
+                        "research",
+                        "build",
+                        "dist",
+                        ".flatpak-builder",
+                        "packaging/arch/src",
+                        "packaging/arch/pkg"
+                    ]
+                }
+            ]
+        }
+    ]
+}

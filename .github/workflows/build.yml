@@ -1,4 +1,4 @@
-name: Arch packages
+name: Linux packages
 on:
   push:
     branches: ['**']
@@ -37,8 +37,32 @@ jobs:
           path: packages/*.pkg.tar.zst
           if-no-files-found: error
 
+  flatpak:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+      options: --privileged
+    steps:
+      - name: Install Flatpak Builder
+        run: pacman -Syu --needed --noconfirm flatpak-builder git
+      - uses: actions/checkout@v4
+      - name: Build and test Flatpak
+        shell: bash
+        run: |
+          set -euo pipefail
+          flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak-builder --install-deps-from=flathub --run-tests --repo=dist/flatpak-repo \
+            dist/flatpak-build packaging/flatpak/io.github.Michy234.WiredPad.json
+          flatpak build-bundle --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo \
+            dist/flatpak-repo dist/WiredPad-x86_64.flatpak io.github.Michy234.WiredPad
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flatpak
+          path: dist/WiredPad-x86_64.flatpak
+          if-no-files-found: error
+
   release:
-    needs: arch
+    needs: [arch, flatpak]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
@@ -47,6 +71,10 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: arch-packages
+          path: packages
+      - uses: actions/download-artifact@v4
+        with:
+          name: flatpak
           path: packages
       - name: Publish tested packages
         shell: bash
@@ -57,11 +85,11 @@ jobs:
           set -euo pipefail
           tag="arch-${GITHUB_RUN_NUMBER}-${GITHUB_SHA:0:8}"
           if gh release view "$tag" >/dev/null 2>&1; then
-            gh release upload "$tag" packages/*.pkg.tar.zst --clobber
+            gh release upload "$tag" packages/*.pkg.tar.zst packages/*.flatpak --clobber
           else
             flags=(--prerelease)
             if [[ "$GITHUB_REF_NAME" == main ]]; then flags=(--latest); fi
-            gh release create "$tag" packages/*.pkg.tar.zst --target "$GITHUB_SHA" \
-              --title "WiredPad · Arch build $GITHUB_RUN_NUMBER" "${flags[@]}" \
-              --notes 'Install matching kernel headers first (linux-zen-headers for linux-zen). Download both packages into an empty directory and run `sudo pacman -U ./*.pkg.tar.zst`.'
+            gh release create "$tag" packages/*.pkg.tar.zst packages/*.flatpak --target "$GITHUB_SHA" \
+              --title "WiredPad · Linux build $GITHUB_RUN_NUMBER" "${flags[@]}" \
+              --notes $'**Flatpak**: Install `WiredPad-x86_64.flatpak` with `flatpak install --user ./WiredPad-x86_64.flatpak`. The bundle requires EVDI, usbmuxd and access to /dev/uinput on the host.\n\n**Arch**: Install matching kernel headers, download both .pkg.tar.zst files into an empty directory and run `sudo pacman -U ./*.pkg.tar.zst`.'
           fi

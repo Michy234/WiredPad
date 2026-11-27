@@ -11,6 +11,19 @@ which is installed separately. This is an independent project.
 
 ## Get started
 
+The x86_64 Flatpak is available as a bundle in [GitHub Releases](https://github.com/Michy234/WiredPad/releases).
+Download `WiredPad-x86_64.flatpak` and install it:
+
+```sh
+flatpak install --user ./WiredPad-x86_64.flatpak
+```
+
+The KDE runtime comes from Flathub. On the host, install and load the EVDI
+driver, make `/dev/uinput` writable by your desktop session for touch, and
+start `usbmuxd` before opening WiredPad. Restart WiredPad if the USB service is
+restarted. The bundle uses direct access to devices for EVDI and touch, and
+talks to KWin to map the touchscreen to the tablet display.
+
 On Arch Linux, clone the project and build the package:
 
 ```sh

@@ -2,6 +2,7 @@
 /.research/
 /research/
 /dist/
+/.flatpak-builder/
 /src/build/
 /pkg/
 /src/wiredpad/

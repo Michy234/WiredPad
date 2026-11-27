@@ -246,7 +246,7 @@ void Window::start() {
                   "Use wiredpad-host --evdi-card N to select a dedicated EVDI device. See Help.");
         return;
     }
-    if (!QFileInfo::exists("/var/run/usbmuxd")) {
+    if (!QFileInfo::exists("/run/usbmuxd") && !QFileInfo::exists("/var/run/usbmuxd")) {
         setStatus(
             "USB service needed",
             "Start usbmuxd.service, then connect and trust your iPad. See Help for instructions.");
