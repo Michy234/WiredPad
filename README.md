@@ -15,13 +15,27 @@ On Arch Linux, clone the project and build the package:
 
 ```sh
 git clone https://github.com/Michy234/WiredPad.git
-cd WiredPad/packaging/arch
-makepkg -si
+cd WiredPad
+# Use linux-headers instead for the stock linux kernel, or linux-lts-headers for LTS.
+sudo pacman -Syu --needed linux-zen-headers
+(cd packaging/arch/evdi-wiredpad-dkms && makepkg -si)
+(cd packaging/arch && makepkg -si)
 ```
 
-WiredPad builds its user-space `libevdi` library automatically. You only need
-the EVDI kernel module. Run `./scripts/setup-evdi.sh` to configure or build
-the driver for your running kernel.
+WiredPad depends on `evdi-wiredpad-dkms`, the pinned EVDI driver used by this
+project. DKMS rebuilds it when kernels are installed or updated, and the package
+loads one virtual display at boot. Keep headers installed for each kernel you
+use. WiredPad builds its user-space `libevdi` library automatically.
+
+For prebuilt downloads, install both packages in the same pacman transaction:
+
+```sh
+sudo pacman -U ./evdi-wiredpad-dkms-*.pkg.tar.zst ./wiredpad-0.1.0-3-*.pkg.tar.zst
+```
+
+For local files pacman needs both packages; it cannot download the companion
+package unless it is available in a configured package repository. Load EVDI
+immediately with `sudo modprobe evdi`, or reboot after installation.
 
 Then:
 

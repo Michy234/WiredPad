@@ -14,3 +14,7 @@ __pycache__/
 
 /packaging/arch/src/
 /packaging/arch/pkg/
+
+/packaging/arch/evdi-wiredpad-dkms/src/
+/packaging/arch/evdi-wiredpad-dkms/pkg/
+/packaging/arch/evdi-wiredpad-dkms/evdi-*.tar.gz

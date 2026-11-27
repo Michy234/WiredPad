@@ -4,19 +4,39 @@ WiredPad is a desktop-session app. Run it as your normal user, not as root.
 
 ## Arch Linux
 
-WiredPad includes and builds the user-space `libevdi` library automatically, so
-a separate library package is not required. You only need the EVDI kernel module.
+Install `evdi-wiredpad-dkms` from `packaging/arch/evdi-wiredpad-dkms` before
+building WiredPad, or install both prebuilt packages together with `pacman -U`.
+It is a required WiredPad dependency and replaces other EVDI kernel packages.
+The module sources are pinned to upstream commit
+`8acd0b28230d271cc338bc3b2f201fb696dbd286` (1.15.1, with kernel API detection),
+the same source used in the original hardware test; no temporary `.ko` is needed.
+The user-space `libevdi` library is still supplied by WiredPad.
 
-If you are running a recent kernel (such as Linux 6.12+ or 7.x / linux-zen),
-use the automated setup script to build and configure the matching driver:
+Install headers matching **each kernel you use**: `linux-headers`,
+`linux-zen-headers`, `linux-lts-headers`, or the equivalent for your custom kernel.
+The `LINUX-HEADERS` dependency enforces a header provider; it cannot ensure that
+the provider matches every installed kernel. For linux-zen:
 
 ```sh
-./scripts/setup-evdi.sh
-# or after package installation:
+sudo pacman -Syu --needed linux-zen-headers
+```
+
+DKMS's pacman hooks build and install the module for kernels with headers.
+Inspect the transaction output for failures. The driver package supplies
+`/usr/lib/modules-load.d/evdi-wiredpad.conf` and
+`/usr/lib/modprobe.d/evdi-wiredpad.conf`: EVDI loads at boot with
+`initial_device_count=1`. Do not unload a module in use by your desktop.
+
+After a kernel update, reboot into the updated kernel. To load EVDI immediately
+for your running kernel (if its matching headers are installed):
+
+```sh
 wiredpad-setup-evdi
 ```
 
-Alternatively, install `evdi-dkms` and headers for your running kernel (`uname -r`).
+This helper checks the installed module and runs modprobe; it does not clone,
+compile or load an uninstalled driver. An old manually loaded module is replaced
+on reboot, rather than being unloaded from a running desktop.
 
 Start the USB service, connect and unlock the iPad, and accept the trust prompt:
 
@@ -81,11 +101,16 @@ systemctl --user stop wiredpad.service
 ```
 
 It is not enabled automatically. Do not run the unit and the app's host together.
-Configure persistent driver loading through your distribution's EVDI package.
+The Arch driver package configures persistent loading automatically.
 
 ## Troubleshooting
 
-- **No EVDI display:** check module/library versions, kernel headers and `lsmod`.
+- **No EVDI display after reboot:** run `dkms status`, `modinfo evdi`, and
+  `journalctl -b -u systemd-modules-load`. If the module is missing for `uname -r`,
+  install that kernel's matching headers and run `sudo dkms autoinstall`.
+  Build errors are logged in `/var/lib/dkms/evdi/1.15.1.wiredpad1/`.
+  DKMS also needs your usual module-signing setup if Secure Boot enforces it.
+  Check `/etc/modprobe.d/` for old options overriding `initial_device_count=1`.
 - **No iPad:** check usbmuxd, USB trust, pairing and that the client app is open.
 - **Connected, no output:** enable the virtual display in desktop settings.
 - **Wrong input screen:** select the tablet output in WiredPad; check mapping.

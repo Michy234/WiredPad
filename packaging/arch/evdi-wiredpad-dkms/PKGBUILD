@@ -1,0 +1,29 @@
+# Pinned to the EVDI source used for WiredPad's hardware tests.
+pkgname=evdi-wiredpad-dkms
+pkgver=1.15.1.r1.g8acd0b2
+pkgrel=1
+pkgdesc='EVDI virtual display driver for WiredPad, rebuilt by DKMS'
+arch=('any')
+url='https://github.com/DisplayLink/evdi'
+license=('GPL-2.0-only')
+depends=('dkms' 'LINUX-HEADERS')
+provides=("evdi-dkms=$pkgver")
+conflicts=('evdi-dkms' 'evdi-git' 'evdi')
+options=('!strip' '!debug')
+_commit=8acd0b28230d271cc338bc3b2f201fb696dbd286
+_dkmsver=1.15.1.wiredpad1
+source=("evdi-$_commit.tar.gz::https://codeload.github.com/DisplayLink/evdi/tar.gz/$_commit"
+        'dkms.conf' 'evdi-wiredpad-modules.conf' 'evdi-wiredpad-options.conf')
+sha256sums=('8f15c3f737b00a8a7892a1fa46ef48c863194b2a67d31384a1a2259bf673d53a'
+            '8883092c3e2b173c7c6c413c8aa100e98be3f9c3b4ef95cc5429f1c88c1b1d54' '33f460eeaef361e32d797dca4edb4013a2c1acd74ac152a2b1e345fb55f38a0c' '7cef80af48324a50670356335ea35cf084c174523bc08b97e082bebcef0bcd6c')
+
+package() {
+    local target="$pkgdir/usr/src/evdi-$_dkmsver"
+    install -d "$target"
+    cp -a "$srcdir/evdi-$_commit/module/." "$target/"
+    install -m644 "$srcdir/dkms.conf" "$target/dkms.conf"
+    install -Dm644 "$srcdir/evdi-wiredpad-modules.conf" \
+        "$pkgdir/usr/lib/modules-load.d/evdi-wiredpad.conf"
+    install -Dm644 "$srcdir/evdi-wiredpad-options.conf" \
+        "$pkgdir/usr/lib/modprobe.d/evdi-wiredpad.conf"
+}

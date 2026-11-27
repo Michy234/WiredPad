@@ -1,0 +1,25 @@
+pkgbase = evdi-wiredpad-dkms
+	pkgdesc = EVDI virtual display driver for WiredPad, rebuilt by DKMS
+	pkgver = 1.15.1.r1.g8acd0b2
+	pkgrel = 1
+	url = https://github.com/DisplayLink/evdi
+	arch = any
+	license = GPL-2.0-only
+	depends = dkms
+	depends = LINUX-HEADERS
+	provides = evdi-dkms=1.15.1.r1.g8acd0b2
+	conflicts = evdi-dkms
+	conflicts = evdi-git
+	conflicts = evdi
+	options = !strip
+	options = !debug
+	source = evdi-8acd0b28230d271cc338bc3b2f201fb696dbd286.tar.gz::https://codeload.github.com/DisplayLink/evdi/tar.gz/8acd0b28230d271cc338bc3b2f201fb696dbd286
+	source = dkms.conf
+	source = evdi-wiredpad-modules.conf
+	source = evdi-wiredpad-options.conf
+	sha256sums = 8f15c3f737b00a8a7892a1fa46ef48c863194b2a67d31384a1a2259bf673d53a
+	sha256sums = 8883092c3e2b173c7c6c413c8aa100e98be3f9c3b4ef95cc5429f1c88c1b1d54
+	sha256sums = 33f460eeaef361e32d797dca4edb4013a2c1acd74ac152a2b1e345fb55f38a0c
+	sha256sums = 7cef80af48324a50670356335ea35cf084c174523bc08b97e082bebcef0bcd6c
+
+pkgname = evdi-wiredpad-dkms

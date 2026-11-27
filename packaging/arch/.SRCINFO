@@ -1,0 +1,25 @@
+pkgbase = wiredpad
+	pkgdesc = Use your tablet as an extra display on Linux over USB
+	pkgver = 0.1.0
+	pkgrel = 3
+	url = https://github.com/Michy234/WiredPad
+	install = wiredpad.install
+	arch = x86_64
+	arch = aarch64
+	license = GPL-3.0-or-later
+	makedepends = cmake
+	makedepends = pkgconf
+	depends = ffmpeg
+	depends = libdrm
+	depends = libusbmuxd
+	depends = libimobiledevice
+	depends = libplist
+	depends = qt6-base
+	depends = qt6-svg
+	depends = usbmuxd
+	depends = evdi-wiredpad-dkms
+	optdepends = polkit: load the display driver from the app
+	optdepends = kscreen: Plasma display settings
+	optdepends = xorg-xinput: input mapping in X11
+
+pkgname = wiredpad
