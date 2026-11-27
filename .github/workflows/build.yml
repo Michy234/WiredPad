@@ -1,23 +1,67 @@
-name: Build
-on: [push, pull_request]
+name: Arch packages
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
 permissions:
   contents: read
+
 jobs:
   arch:
     runs-on: ubuntu-latest
     container: archlinux:base-devel
     steps:
       - name: Install build dependencies
-        run: pacman -Syu --noconfirm cmake pkgconf git ffmpeg libusbmuxd libimobiledevice libplist qt6-base qt6-svg
+        run: pacman -Syu --needed --noconfirm cmake git ffmpeg libdrm libusbmuxd libimobiledevice libplist qt6-base qt6-svg usbmuxd dkms linux-headers
       - uses: actions/checkout@v4
-      - name: Build and test
+      - name: Build driver and test WiredPad
+        shell: bash
         run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
-          cmake --build build --parallel 2
-          ctest --test-dir build --output-on-failure
-          DESTDIR="$PWD/stage" cmake --install build
-      - name: Upload staged installation
-        uses: actions/upload-artifact@v4
+          set -euo pipefail
+          useradd -m builder
+          # makepkg needs a writable checkout and an unprivileged account.
+          cp -a "$GITHUB_WORKSPACE" /home/builder/WiredPad
+          chown -R builder:builder /home/builder/WiredPad
+          cd /home/builder/WiredPad/packaging/arch/evdi-wiredpad-dkms
+          runuser -u builder -- makepkg
+          driver=(evdi-wiredpad-dkms-*.pkg.tar.zst)
+          pacman -U --noconfirm "${driver[@]}"
+          cd ..
+          runuser -u builder -- makepkg
+          mkdir "$GITHUB_WORKSPACE/packages"
+          cp wiredpad-[0-9]*.pkg.tar.zst "evdi-wiredpad-dkms/${driver[0]}" "$GITHUB_WORKSPACE/packages/"
+      - uses: actions/upload-artifact@v4
         with:
-          name: wiredpad-linux-x86_64
-          path: stage/
+          name: arch-packages
+          path: packages/*.pkg.tar.zst
+          if-no-files-found: error
+
+  release:
+    needs: arch
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: arch-packages
+          path: packages
+      - name: Publish tested packages
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          tag="arch-${GITHUB_RUN_NUMBER}-${GITHUB_SHA:0:8}"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" packages/*.pkg.tar.zst --clobber
+          else
+            flags=(--prerelease)
+            if [[ "$GITHUB_REF_NAME" == main ]]; then flags=(--latest); fi
+            gh release create "$tag" packages/*.pkg.tar.zst --target "$GITHUB_SHA" \
+              --title "WiredPad · Arch build $GITHUB_RUN_NUMBER" "${flags[@]}" \
+              --notes 'Install matching kernel headers first (linux-zen-headers for linux-zen). Download both packages into an empty directory and run `sudo pacman -U ./*.pkg.tar.zst`.'
+          fi
