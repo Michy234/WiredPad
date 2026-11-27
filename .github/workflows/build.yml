@@ -51,7 +51,8 @@ jobs:
         run: |
           set -euo pipefail
           flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-          flatpak-builder --install-deps-from=flathub --run-tests --repo=dist/flatpak-repo \
+          mkdir -p dist
+          flatpak-builder --install-deps-from=flathub --repo=dist/flatpak-repo \
             dist/flatpak-build packaging/flatpak/io.github.Michy234.WiredPad.json
           flatpak build-bundle --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo \
             dist/flatpak-repo dist/WiredPad-x86_64.flatpak io.github.Michy234.WiredPad

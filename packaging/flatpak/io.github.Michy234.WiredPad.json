@@ -114,6 +114,7 @@
                 "-DCMAKE_BUILD_TYPE=Release",
                 "-DCMAKE_INSTALL_LIBDIR=lib"
             ],
+            "run-tests": true,
             "test-commands": [
                 "ctest --output-on-failure"
             ],
