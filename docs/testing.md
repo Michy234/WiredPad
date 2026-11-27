@@ -60,13 +60,12 @@ Due correzioni derivate dai test fisici:
 
 1. uinput rifiutava 256 slot; ora gli ID sono mappati a **dieci slot** riutilizzabili.
 2. Tradurre i comandi legacy in touch diretto permetteva il tap ma non il drag.
-   Ora vengono iniettati da **WiredPad Pointer**, una penna assoluta uinput,
-   mappata da KWin a DVI-I-1. Tap e drag sono stati confermati dall'utente.
+   Nella versione con penna assoluta l'utente aveva confermato tap e drag.
 
-**WiredPad Touch** resta disponibile per il parser HID 16/17, con dieci slot.
-Entrambi i dispositivi sono associati a DVI-I-1 tramite proprietà outputName di KWin.
-Lo script `wiredpad-map-input DVI-I-1` applica e verifica il mapping
-soltanto ai due dispositivi XDisplay.
+La versione corrente espone un solo touchscreen, **WiredPad Touch**. I test
+coprono il trascinamento legacy come sequenza pressione/movimento/rilascio e
+il passaggio a input HID nella stessa sessione. Il drag con questa versione
+resta da verificare sull'iPad.
 
 Nella prova con due dita sono arrivati 15 messaggi tag 07, **comando 11**, senza
 ID multipli o comandi HID 16/17. Il comando 11 non viene iniettato: non sono stati

@@ -76,24 +76,30 @@ std::optional<Touch> touch(const Packet &p, int w, int h) {
     int x = int(int16_t(xy & 0xffff)) - 1, y = int(int16_t(xy >> 16));
     return Touch{uint8_t(id), type == 16, std::clamp(x, 0, w - 1), std::clamp(y, 0, h - 1)};
 }
-std::optional<Touch> TouchDecoder::decode(const Packet &p, int w, int h) {
+std::vector<Touch> TouchDecoder::decode(const Packet &p, int w, int h) {
     if (w <= 0 || h <= 0)
         throw std::runtime_error("invalid input dimensions");
-    if (auto hid = touch(p, w, h))
-        return hid;
-    if (p.tag != 3 && p.tag != 7)
+    if (auto hid = touch(p, w, h)) {
+        hid_seen_ = true;
+        if (legacy_down_) {
+            legacy_down_ = false;
+            return {Touch{0, false, 0, 0}, *hid};
+        }
+        return {*hid};
+    }
+    if (hid_seen_ || (p.tag != 3 && p.tag != 7))
         return {};
     auto order = p.tag == 7 ? Order::Network : Order::Little;
     auto type = word(p.payload, 0, order);
     if (type == 5)
-        pointer_down_ = true;
-    else if (type == 6)
-        pointer_down_ = false;
-    else if (type != 10)
+        legacy_down_ = true;
+    else if (type == 6 && legacy_down_)
+        legacy_down_ = false;
+    else if (type != 10 || !legacy_down_)
         return {};
     auto x = word(p.payload, 4, order), y = word(p.payload, 8, order);
-    return Touch{0, pointer_down_, int(std::min(x, uint32_t(w - 1))),
-                 int(std::min(y, uint32_t(h - 1))), true};
+    return {Touch{0, legacy_down_, int(std::min(x, uint32_t(w - 1))),
+                 int(std::min(y, uint32_t(h - 1)))}};
 }
 
 std::array<uint8_t, 128> edid(int w, int h, int fps) {

@@ -43,10 +43,10 @@ Open Wired XDisplay on the iPad and press **Start display** in WiredPad. Enable
 the new display in your desktop's display settings, initially without rotation
 or fractional scaling. Move a window onto it.
 
-On Plasma Wayland, WiredPad automatically maps its pointer and touch devices to
-the EVDI output. The **Input display** selector overrides the automatic choice.
-The app uses a mapped absolute pen for legacy mouse commands, so dragging works
-without moving input to the main screen. HID multitouch uses a separate device.
+On Plasma Wayland, WiredPad maps **WiredPad Touch** to the tablet output.
+If a touch lands on another monitor, select the tablet connector under **Input display**.
+Clients that send press, move and release commands provide one touch contact.
+Clients that report individual contact IDs can provide up to ten simultaneous touches.
 
 On X11, install xinput and a suitable EVDI/Xorg configuration. Load EVDI before
 starting Xorg. The app maps input with xinput; you may need to link GPU providers:

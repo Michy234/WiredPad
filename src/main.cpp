@@ -98,11 +98,9 @@ int main(int argc, char **argv) {
                 uint64_t frames = 0, video_bytes = 0;
                 auto report = std::chrono::steady_clock::now();
                 xd::Encoder encoder(s.width, s.height, fps);
-                std::unique_ptr<xd::Input> input, pointer;
-                if (!no_input && !test_pattern) {
+                std::unique_ptr<xd::Input> input;
+                if (!no_input && !test_pattern)
                     input = std::make_unique<xd::Input>(s.width, s.height);
-                    pointer = std::make_unique<xd::Input>(s.width, s.height, true);
-                }
                 xd::Parser parser(s.order);
                 xd::TouchDecoder touch_decoder;
                 auto next = std::chrono::steady_clock::now();
@@ -132,16 +130,15 @@ int main(int argc, char **argv) {
                                           << xd::word(p->payload, 4, o) << ","
                                           << xd::word(p->payload, 8, o) << std::endl;
                             }
-                            if (auto t = touch_decoder.decode(*p, s.width, s.height); t) {
-                                if (t->pointer && pointer)
-                                    pointer->apply(*t);
-                                else if (!t->pointer && input)
-                                    input->apply(*t);
+                            for (auto t : touch_decoder.decode(*p, s.width, s.height)) {
+                                if (input)
+                                    input->apply(t);
                                 if (test_pattern || trace_input)
-                                    std::cout << "touch id=" << unsigned(t->id)
-                                              << " down=" << t->down << " x=" << t->x
-                                              << " y=" << t->y << std::endl;
-                            } else if ((p->tag == 3 || p->tag == 7) && p->payload.size() == 12) {
+                                    std::cout << "touch id=" << unsigned(t.id)
+                                              << " down=" << t.down << " x=" << t.x
+                                              << " y=" << t.y << std::endl;
+                            }
+                            if ((p->tag == 3 || p->tag == 7) && p->payload.size() == 12) {
                                 auto o = p->tag == 7 ? xd::Order::Network : xd::Order::Little;
                                 auto cmd = xd::word(p->payload, 0, o);
                                 if (cmd == 0x70 || cmd == 0x71)

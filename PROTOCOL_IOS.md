@@ -159,11 +159,10 @@ o valori normalizzati 0..65535. Esempio reale x=433, y=334:
 07 00 00 0c  00 00 00 06  00 00 01 b1  00 00 01 4e
 ```
 
-Il demone mantiene lo stato premuto durante i movimenti e applica il clamp
-sulle dimensioni del display. Per questo percorso espone **WiredPad Pointer**
-tramite uinput come penna assoluta: libinput/KWin possono associarla al solo
-output virtuale e conservare click e trascinamento. Il primo tentativo di
-tradurre questi comandi in tocchi diretti permetteva il tap ma non il drag.
+Il demone traduce pressione, movimento durante la pressione e rilascio in un
+singolo contatto sul touchscreen uinput **WiredPad Touch**. Ignora i movimenti
+a dito sollevato. Quando riceve il primo pacchetto HID 16/17, chiude un eventuale
+contatto legacy e usa gli ID HID per il resto della sessione USB.
 
 Nella prova fisica con due dita, questa versione dell'app ha emesso **comando
 11** con valori nel secondo u32, senza coppie di ID contatto. La semantica

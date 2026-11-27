@@ -8,7 +8,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 namespace xd {
-Input::Input(int w, int h, bool pointer) : pointer_(pointer) {
+Input::Input(int w, int h) {
     fd_ = open("/dev/uinput", O_WRONLY | O_CLOEXEC);
     if (fd_ < 0)
         throw std::runtime_error("cannot open /dev/uinput");
@@ -20,38 +20,27 @@ Input::Input(int w, int h, bool pointer) : pointer_(pointer) {
         set(UI_SET_EVBIT, EV_KEY);
         set(UI_SET_KEYBIT, BTN_TOUCH);
         set(UI_SET_EVBIT, EV_ABS);
-        set(UI_SET_PROPBIT, pointer ? INPUT_PROP_POINTER : INPUT_PROP_DIRECT);
-        if (pointer) {
-            set(UI_SET_KEYBIT, BTN_TOOL_PEN);
-            set(UI_SET_KEYBIT, BTN_STYLUS);
-        }
+        set(UI_SET_PROPBIT, INPUT_PROP_DIRECT);
         auto axis = [&](int code, int max) {
             set(UI_SET_ABSBIT, code);
             uinput_abs_setup a{};
             a.code = code;
             a.absinfo.maximum = max;
-            if (pointer && (code == ABS_X || code == ABS_Y))
-                a.absinfo.resolution = 10;
             if (ioctl(fd_, UI_ABS_SETUP, &a) < 0)
                 throw std::runtime_error("uinput axis " + std::to_string(code) +
                                          " failed: " + std::strerror(errno));
         };
         axis(ABS_X, w - 1);
         axis(ABS_Y, h - 1);
-        if (pointer) {
-            axis(ABS_PRESSURE, 255);
-            axis(ABS_DISTANCE, 1);
-        } else {
-            axis(ABS_MT_SLOT, 9);
-            axis(ABS_MT_TRACKING_ID, 65535);
-            axis(ABS_MT_POSITION_X, w - 1);
-            axis(ABS_MT_POSITION_Y, h - 1);
-        }
+        axis(ABS_MT_SLOT, 9);
+        axis(ABS_MT_TRACKING_ID, 65535);
+        axis(ABS_MT_POSITION_X, w - 1);
+        axis(ABS_MT_POSITION_Y, h - 1);
         uinput_setup s{};
         s.id.bustype = BUS_USB;
         s.id.vendor = 0x1209;
-        s.id.product = pointer ? 0x5845 : 0x5844;
-        std::strcpy(s.name, pointer ? "WiredPad Pointer" : "WiredPad Touch");
+        s.id.product = 0x5844;
+        std::strcpy(s.name, "WiredPad Touch");
         if (ioctl(fd_, UI_DEV_SETUP, &s) < 0 || ioctl(fd_, UI_DEV_CREATE) < 0)
             throw std::runtime_error("uinput create failed");
     } catch (...) {
@@ -97,24 +86,10 @@ std::optional<SlotChange> ContactSlots::update(Touch t) {
     return SlotChange{index, begins, active};
 }
 void Input::apply(Touch t) {
-    if (pointer_) {
-        if (!proximity_) {
-            event(EV_ABS, ABS_X, t.x);
-            event(EV_ABS, ABS_Y, t.y);
-            event(EV_KEY, BTN_TOOL_PEN, 1);
-            event(EV_SYN, SYN_REPORT, 0);
-            proximity_ = true;
-        }
-        event(EV_ABS, ABS_X, t.x);
-        event(EV_ABS, ABS_Y, t.y);
-        event(EV_ABS, ABS_PRESSURE, t.down ? 255 : 0);
-        event(EV_KEY, BTN_TOUCH, t.down);
-        event(EV_SYN, SYN_REPORT, 0);
-        return;
-    }
     auto change = slots_.update(t);
     if (!change)
         return;
+    event(EV_KEY, BTN_TOUCH, change->any_active);
     event(EV_ABS, ABS_MT_SLOT, change->slot);
     if (t.down) {
         if (change->begins)
@@ -125,7 +100,6 @@ void Input::apply(Touch t) {
         event(EV_ABS, ABS_Y, t.y);
     } else
         event(EV_ABS, ABS_MT_TRACKING_ID, -1);
-    event(EV_KEY, BTN_TOUCH, change->any_active);
     event(EV_SYN, SYN_REPORT, 0);
 }
 } // namespace xd

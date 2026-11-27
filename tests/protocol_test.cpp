@@ -56,7 +56,7 @@ void parser_tests(Order o) {
     Packet touch_packet{uint8_t(o == Order::Network ? 7 : 3),
                         words({16, 5, (200u << 16) | 101}, o)};
     auto t = touch(touch_packet, 1024, 768);
-    CHECK(t && !t->pointer && t->id == 5 && t->x == 100 && t->y == 200 && t->down);
+    CHECK(t && t->id == 5 && t->x == 100 && t->y == 200 && t->down);
     touch_packet.payload = words({17, 5, 0xffffffff}, o);
     t = touch(touch_packet, 1024, 768);
     CHECK(t && !t->down && t->x == 0 && t->y == 0);
@@ -71,18 +71,23 @@ void legacy_touch_tests(Order order) {
         return Packet{uint8_t(order == Order::Network ? 7 : 3), words({cmd, x, y}, order)};
     };
     auto hover = decoder.decode(input(10, 433, 334), 1024, 768);
-    CHECK(hover && hover->pointer && !hover->down);
+    CHECK(hover.empty());
     auto down = decoder.decode(input(5, 433, 334), 1024, 768);
-    CHECK(down && down->pointer && down->id == 0 && down->down && down->x == 433 && down->y == 334);
+    CHECK(down.size() == 1 && down[0].id == 0 && down[0].down && down[0].x == 433 && down[0].y == 334);
     auto move = decoder.decode(input(10, 500, 400), 1024, 768);
-    CHECK(move && move->down && move->x == 500 && move->y == 400);
+    CHECK(move.size() == 1 && move[0].down && move[0].x == 500 && move[0].y == 400);
     auto up = decoder.decode(input(6, 500, 400), 1024, 768);
-    CHECK(up && !up->down);
-    hover = decoder.decode(input(10, 600, 500), 1024, 768);
-    CHECK(hover && hover->pointer && !hover->down);
+    CHECK(up.size() == 1 && !up[0].down);
+    CHECK(decoder.decode(input(10, 600, 500), 1024, 768).empty());
     auto edge = decoder.decode(input(5, 0xffffffff, 0xffffffff), 1024, 768);
-    CHECK(edge && edge->x == 1023 && edge->y == 767);
-    CHECK(!decoder.decode(input(8, 0, 0), 1024, 768));
+    CHECK(edge.size() == 1 && edge[0].x == 1023 && edge[0].y == 767);
+    CHECK(decoder.decode(input(8, 0, 0), 1024, 768).empty());
+    auto hid = decoder.decode(input(16, 3, 0), 1024, 768);
+    CHECK(hid.size() == 2 && !hid[0].down && hid[0].id == 0 && hid[1].down && hid[1].id == 3);
+    CHECK(decoder.decode(input(6, 0, 0), 1024, 768).empty());
+    CHECK(decoder.decode(input(5, 0, 0), 1024, 768).empty());
+    auto second = decoder.decode(input(16, 0, 0), 1024, 768);
+    CHECK(second.size() == 1 && second[0].down && second[0].id == 0);
 }
 
 void slot_tests() {

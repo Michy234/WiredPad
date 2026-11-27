@@ -7,7 +7,7 @@
   <project_license>GPL-3.0-or-later</project_license>
   <developer id="io.github.michy234"><name>WiredPad contributors</name></developer>
   <description>
-    <p>WiredPad connects a compatible iPad to a Linux desktop over USB. It creates a virtual display and sends the desktop to the tablet, with absolute pointer input.</p>
+    <p>WiredPad connects a compatible iPad to a Linux desktop over USB. It creates a virtual display and sends the desktop to the tablet, with direct touchscreen input.</p>
     <p>A compatible Wired XDisplay client, the EVDI display driver and a paired USB device are required. Compatibility is currently tested on Plasma Wayland with a legacy iPad client.</p>
   </description>
   <launchable type="desktop-id">io.github.Michy234.WiredPad.desktop</launchable>

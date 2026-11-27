@@ -4,7 +4,7 @@
 
 WiredPad is a small Linux desktop app for connecting a compatible iPad as an
 extra screen. Start or stop sharing from one window, choose a frame rate, and
-use the tablet to point, click and drag. The host runs locally over USB.
+use the tablet as a touchscreen. The host runs locally over USB.
 
 The current backend works with the **Splashtop Wired XDisplay iPad client**,
 which is installed separately. This is an independent project.
@@ -40,7 +40,7 @@ available in [Releases](https://github.com/Michy234/WiredPad/releases).
 
 - USB device detection, pairing validation and automatic reconnection.
 - A virtual EVDI display at the resolution reported by the tablet.
-- JPEG video encoding with FFmpeg, and absolute pointer input through uinput.
+- JPEG video encoding with FFmpeg, and direct touchscreen input through uinput.
 - Video updates, taps and window dragging tested on **Plasma Wayland**.
 - Native Qt app with system tray minimization, desktop launcher and host daemon.
 

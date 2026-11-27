@@ -312,10 +312,11 @@ void Window::consumeOutput() {
         appendLog(line);
         if (stopping_)
             continue;
-        if (line.startsWith("iPad "))
+        if (line.startsWith("iPad ")) {
+            mapped_.clear();
             setStatus("iPad connected",
                       "Enable the new output in Display settings. " + line.section(' ', 1, 1));
-        else if (line.startsWith("stream frames=")) {
+        } else if (line.startsWith("stream frames=")) {
             auto match = QRegularExpression("frames=([0-9]+)").match(line);
             if (match.hasMatch() && match.captured(1).toULongLong() > 0)
                 setStatus("Display active", "Your desktop is being sent to the tablet over USB.");
@@ -331,12 +332,13 @@ void Window::mapInput() {
         mapping_->setText("Tablet input is disabled.");
         return;
     }
-    const auto output = desiredOutput_.isEmpty() ? virtualOutput() : desiredOutput_;
+    const auto selected = output_->currentData().toString();
+    const auto output = selected.isEmpty() ? virtualOutput() : selected;
     if (output.isEmpty()) {
         mapping_->setText("The tablet output appears after connecting.");
         return;
     }
-    const bool kwin =
+    const bool kwin = QGuiApplication::platformName().startsWith("wayland") &&
         QDBusConnection::sessionBus().interface()->isServiceRegistered("org.kde.KWin");
     int matched = 0;
     for (const auto &event :
@@ -345,7 +347,7 @@ void Window::mapInput() {
         if (!file.open(QIODevice::ReadOnly))
             continue;
         const auto name = QString::fromUtf8(file.readAll()).trimmed();
-        if (name != "WiredPad Touch" && name != "WiredPad Pointer")
+        if (name != "WiredPad Touch")
             continue;
         const auto key = event + ":" + output;
         if (mapped_.contains(key)) {
@@ -376,7 +378,7 @@ void Window::mapInput() {
                     });
         }
     }
-    if (matched == 2)
+    if (matched > 0)
         mapping_->setText("Tablet input is mapped to " + output + ".");
     else if (kwin)
         mapping_->setText("Waiting to map tablet input to " + output + "…");

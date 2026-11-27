@@ -36,14 +36,14 @@ struct Touch {
     uint8_t id;
     bool down;
     int x, y;
-    bool pointer = false;
 };
 std::optional<Touch> touch(const Packet &p, int width, int height);
 class TouchDecoder {
-    bool pointer_down_ = false;
+    bool legacy_down_ = false;
+    bool hid_seen_ = false;
 
   public:
-    std::optional<Touch> decode(const Packet &p, int width, int height);
+    std::vector<Touch> decode(const Packet &p, int width, int height);
 };
 std::array<uint8_t, 128> edid(int width, int height, int fps);
 } // namespace xd

@@ -9,7 +9,7 @@ while IFS= read -r device; do
     [[ -n "$device" ]] || continue
     name=$(qdbus6 org.kde.KWin "$base/$device" org.freedesktop.DBus.Properties.Get "$interface" name)
     case "$name" in
-        'WiredPad Touch'|'WiredPad Pointer')
+        'WiredPad Touch')
             qdbus6 org.kde.KWin "$base/$device" org.freedesktop.DBus.Properties.Set "$interface" outputName "$output"
             actual=$(qdbus6 org.kde.KWin "$base/$device" org.freedesktop.DBus.Properties.Get "$interface" outputName)
             [[ "$actual" == "$output" ]] || { echo "Mapping non applicato: $name" >&2; exit 1; }

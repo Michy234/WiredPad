@@ -15,11 +15,10 @@ class ContactSlots {
 class Input {
     int fd_ = -1;
     ContactSlots slots_;
-    bool pointer_ = false, proximity_ = false;
     void event(uint16_t type, uint16_t code, int value);
 
   public:
-    Input(int width, int height, bool pointer = false);
+    Input(int width, int height);
     ~Input();
     Input(const Input &) = delete;
     Input &operator=(const Input &) = delete;
